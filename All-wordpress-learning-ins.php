@@ -10,26 +10,53 @@
  * 7. Theme support 
  * 8. Comment template
  * 10. Showing Post Date OR time 
+ * 11. Category Id name and link get
  */
 
-
- /*. How to start theme development
+/*
+. How to start theme development
  File Name:header.php
  ===================
+*/
+ ?>
+
 
 <!DOCTYPE html>
-
 <html class="no-js" <?php language_attributes(); ?>>
-
-	<head>
-
-		<meta charset="<?php bloginfo( 'charset' ); ?>">
-
-		<?php wp_head(); ?>
-	</head>
-
-	<body <?php body_class(); ?>>
+<head>
+    <meta charset="<?php bloginfo( 'charset' ); ?>">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+	<title><?php
+	 if (function_exists('is_tag') && is_tag()) {
+			echo 'Tag Archive for &quot;'.$tag.'&quot; | '; 
+	} 
+	elseif (is_archive()) {
+			 wp_title(''); echo ' category | '; 
+	}
+	 elseif (is_search()) {
+		  echo 'Search for &quot;'.wp_specialchars($s).'&quot; - ';
+	}
+	 elseif (!(is_404()) && (is_single()) || (is_page())) { 
+		 wp_title(''); echo ' | '; 
+	}
+	elseif (is_404()) { echo 'Not Found | '; }
+			 
+	if (is_home()) {
+				  bloginfo('name'); echo ' | '; bloginfo('description'); 
+	} 
+	else { 
+		bloginfo('name');
+	 }
+				  
+		 ?>
+		 </title>
+    <?php wp_head(); ?>
+</head>
+<body <?php body_class(); ?>>
 	
+<?php
+/*
 ----------------------------
 File Name: footer.php
 =========================
@@ -161,7 +188,7 @@ endif;
 //File Name: functions.php
 register_post_type( 'Unick_Id', array(
 	'labels'=> array(
-		'name' => 'slider',
+	'name' => 'slider',
 	),
 	'public' => true
 ) )
@@ -170,6 +197,8 @@ register_post_type( 'Unick_Id', array(
 $custom_posts = new WP_Query(array(
 	'post_type' => 'Unick_Id',
 	'posts_per_page' => 5,
+	'category_name'	=> 'catName',
+	'offset'	=>4,
 	)	
 );
 while( $custom_posts->have_posts()):$custom_posts-> the_post();
@@ -209,6 +238,7 @@ if ( is_active_sidebar( 'sidebar-1' ) ) {
  * File Name : functions.php
  */
 function AK_call_style_script_file(){
+	$theme_style_ver = wp_get_theme()->get( 'Version' );
 	//For Inc css Files
 	wp_enqueue_style( 'Uniqe_File_ID', get_theme_file_uri( '/path.css' ), array(), 2.0 , 'all' );
 	//deregister style OR js files
@@ -230,11 +260,6 @@ require_once get_template_directory()."/inc/calling-style.php";
 //file name: functions.php
 
 function support_system(){
-		/*
-		 * Enable all post formate setting.
-		 *
-		 * See: https://wordpress.org/support/article/post-formats/
-		 */
 		add_theme_support(
 			'post-formats',
 			array(
@@ -250,7 +275,6 @@ function support_system(){
 			)
 		);
 
-		//Enable title tag ----
 		add_theme_support( 'title-tag' );
 
 		/**
@@ -390,4 +414,22 @@ function ash_relative_time() {
 echo ash_relative_time();
 
 
+/**
+ * Category Id name and link get
+ */
 
+ //using slug
+ $catObj = get_category_by_slug('uncategorized');  echo get_category_link($catObj);
+ $catName = $catObj->name;//get ctg name by slug
+
+
+ //category page @ use this code just category.php
+ $catID = get_the_category(); 
+  esc_html( $catID[0]->name );
+ category_description( $catID[0] );
+
+ //Post -e category show korta-  it will use to while loop
+ foreach((get_the_category()) as $category){
+	 echo esc_url( get_category_link(  $category->cat_ID );
+	 $category->cat_name . ' ';
+ }
